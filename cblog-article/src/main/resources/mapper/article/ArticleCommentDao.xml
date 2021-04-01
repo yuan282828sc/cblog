@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zcw.cblog.article.dao.ArticleCommentDao">
+
+    <select id="findCommentByAid" parameterType="com.zcw.cblog.common.vo.PageVo" resultType="com.zcw.cblog.article.vo.CommentVo">
+        select
+        u.uid uid,
+        u.nickname nickname,
+        u.avatar avatar,
+        ac.id id,
+        ac.content content,
+        ac.comment_status comment_status,
+        l.num love_num,
+        ac.create_time create_time
+        from
+        article_comment as  ac
+        left join user as u on ac.uid = u.uid
+        left JOIN (select ac.id acid,count(lr.id) num from article_comment_like as lr join article_comment as ac on ac.id = lr.acid GROUP BY(ac.id)) AS l ON l.acid = ac.id
+        where ac.aid = #{aid}
+        ORDER BY ac.create_time asc
+        limit #{start},#{rows};
+    </select>
+    <select id="findCommentByUid" parameterType="com.zcw.cblog.common.vo.PageVo" resultType="com.zcw.cblog.article.vo.CommentVo">
+        select
+        u.uid uid,
+        u.nickname nickname,
+        u.avatar avatar,
+        ac.id id,
+        ac.content content,
+        ac.comment_status comment_status,
+        l.num love_num,
+        s.status status,
+        ac.create_time create_time
+        from
+        article_comment as  ac
+        left join user as u on ac.uid = u.uid
+        left JOIN (select ac.id acid,count(lr.id) num from article_comment_like as lr join article_comment as ac on ac.id = lr.acid GROUP BY(ac.id)) AS l ON l.acid = ac.id
+        left JOIN (select lr.id,ac.aid aid,ac.id acid,lr.uid,lr.status status from article_comment_like as lr join article_comment as ac on lr.acid = ac.id where  lr.uid = #{uid} GROUP BY(lr.id)) AS s on s.acid = ac.id
+        where ac.aid = #{aid}
+        ORDER BY ac.create_time asc
+        limit #{start},#{rows};
+    </select>
+    <select id="findTotal" parameterType="com.zcw.cblog.common.vo.PageVo" resultType="java.lang.Integer">
+	    select count(id) from article_comment where aid = #{aid};
+    </select>
+    <insert id="addComment" parameterType="com.zcw.cblog.article.entity.ArticleCommentEntity">
+        insert into article_comment (aid, uid, create_time, content) values (#{aid},#{uid},#{createTime},#{content});
+    </insert>
+    <insert id="addLoveRecord" parameterType="com.zcw.cblog.article.entity.ArticleCommentEntity">
+        insert into article_comment_like (acid, uid, create_time, status) values(#{acid},#{uid},#{createTime},#{status});
+    </insert>
+    <select id="findLoveRecord" parameterType="com.zcw.cblog.article.entity.ArticleCommentEntity" resultType="java.lang.Integer">
+        select count(id) from article_comment_like where acid = #{acid} and uid = #{uid}
+    </select>
+    <delete id="delLoveRecord" parameterType="com.zcw.cblog.article.entity.ArticleCommentEntity">
+        delete from article_comment_like where uid = #{uid}  and acid = #{acid}
+    </delete>
+    <delete id="delComment" parameterType="java.lang.Integer">
+        delete from article_comment where id = #{acid}
+    </delete>
+</mapper>

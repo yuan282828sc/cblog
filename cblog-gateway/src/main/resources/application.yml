@@ -1,0 +1,34 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        ##文章服务
+        - id: cblog_host_route
+          uri: lb://cblog-article
+          predicates:
+            - Host=cblog.com,article.cblog.com
+        ##文件服务
+        - id: cblog_file_route
+          uri: lb://cblog-file
+          predicates:
+            - Host=file.cblog.com
+        ##消息服务
+        - id: cblog_message_route
+          uri: lb://cblog-message
+          predicates:
+            - Host=message.cblog.com
+        ##音乐服务
+        - id: cblog_music_route
+          uri: lb://cblog-music
+          predicates:
+            - Host=music.cblog.com
+        ##检索服务
+        - id: cblog_search_route
+          uri: lb://cblog-search
+          predicates:
+            - Host=search.cblog.com
+        ##用户服务
+        - id: cblog_user_route
+          uri: lb://cblog-user
+          predicates:
+            - Host=user.cblog.com

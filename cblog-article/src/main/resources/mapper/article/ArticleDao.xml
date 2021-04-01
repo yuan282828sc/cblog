@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zcw.cblog.article.dao.ArticleDao">
+
+
+
+    <select id="findTotalByUid" resultType="java.lang.Integer">
+        select count(aid) from article where uid = #{uid}  and  open_procedure = #{open_procedure}
+    </select>
+
+    <select id="homePageBlog" parameterType="com.zcw.cblog.common.vo.PageVo" resultType="com.zcw.cblog.article.vo.ArticleVo">
+        SELECT
+            u.uid uid,
+            u.nickname nickname,
+            u.avatar avatar,
+            a.aid aid,
+            a.title title,
+            (select count(id) from article_comment where article_comment.aid = a.aid)  comment_num,
+            a.article_type article_type,
+            a.create_time create_time,
+           a.update_time update_time
+        FROM
+            article AS a
+            JOIN user AS u ON a.uid = u.uid
+            where a.top = #{topStatus}  and  a.open_procedure = 0
+            ORDER BY a.update_time desc,a.aid desc LIMIT #{rows};
+    </select>
+
+    <select id="findBlogList" parameterType="com.zcw.cblog.common.vo.PageVo" resultType="com.zcw.cblog.article.vo.ArticleVo">
+        SELECT
+        u.uid uid,
+        u.nickname nickname,
+        u.avatar avatar,
+        a.aid aid,
+        a.title title,
+        (select count(id) from article_comment where article_comment.aid = a.aid) comment_num,
+        a.article_type article_type,
+        a.create_time create_time,
+        a.update_time update_time
+        FROM
+        article AS a
+        JOIN user AS u ON a.uid = u.uid
+        <where>
+            <if test="topStatus!=null">
+                and a.top = #{topStatus}
+            </if>
+            <if test="articleType!=null">
+                and a.article_type = #{articleType}
+            </if>
+            <if test="commentNum!=null and articleType ==null ">
+                and (select count(id) from article_comment where article_comment.aid = a.aid) != #{commentNum} and
+                a.article_type != 2
+            </if>
+            and a.open_procedure = 0
+        </where>
+        <if test="articleType!=null and articleType == 2">
+            ORDER BY a.aid desc LIMIT #{start},#{rows};
+        </if>
+        <if test="articleType == null or articleType != 2">
+            ORDER BY a.update_time desc ,a.aid desc LIMIT #{start},#{rows};
+        </if>
+    </select>
+
+    <select id="findRelationBlogList" parameterType="com.zcw.cblog.common.vo.PageVo" resultType="com.zcw.cblog.article.vo.ArticleVo">
+          SELECT
+             u.uid uid,
+             u.nickname nickname,
+             u.avatar avatar,
+             a.aid aid,
+             a.title title,
+             (select count(id) from article_comment where article_comment.aid = a.aid)  comment_num,
+             a.article_type article_type,
+             a.create_time create_time
+             FROM
+             article AS a
+             JOIN user AS u ON a.uid = u.uid
+	        	JOIN user_relation as rs on rs.rid = u.uid
+                where a.open_procedure = 0 and rs.uid = #{uid}
+        ORDER BY a.aid desc  LIMIT #{start},#{rows};
+    </select>
+
+    <select id="findRelationBlogTotal" parameterType="com.zcw.cblog.common.vo.PageVo" resultType="java.lang.Integer">
+            SELECT
+                count(a.aid)
+            FROM
+                article AS a
+                JOIN user_relation AS rs ON rs.rid = a.uid
+            WHERE
+                a.open_procedure = 0
+                AND rs.uid = #{uid}
+    </select>
+
+    <select id="findTotal" parameterType="com.zcw.cblog.common.vo.PageVo" resultType="java.lang.Integer">
+        select count(aid) from article
+        <where>
+            <if test="topStatus!=null">
+                and top = #{topStatus}
+            </if>
+            <if test="commentNum!=null">
+                and (select count(id) from article_comment where article_comment.aid = article.aid) = #{commentNum}
+            </if>
+            <if test="articleType!=null">
+                and article_type = #{articleType}
+            </if>
+            and open_procedure = 0
+        </where>
+    </select>
+
+    <select id="hotSpot" resultType="com.zcw.cblog.article.vo.ArticleVo">
+        SELECT
+         aid,
+         title,
+        comment_num
+        FROM
+        (SELECT * FROM article WHERE DATE_SUB( CURDATE(), INTERVAL 14 DAY ) <![CDATA[ <= ]]> date( update_time )  and  open_procedure = 0 ORDER BY (select count(id) from article_comment where article_comment.aid = article.aid) DESC LIMIT 10 ) as a
+    </select>
+
+    <select id="findBlogByUid" resultType="com.zcw.cblog.common.to.ArticleTo">
+        SELECT
+        aid,
+        title,
+        create_time,
+        browse_num,
+        article_type,
+       (select count(id) from article_comment where article_comment.aid = article.aid)  comment_num
+        from
+        article
+        where uid = #{uid}  and  open_procedure = #{open_procedure}
+        order by create_time desc
+        limit #{start},10;
+    </select>
+
+    <select id="findBlogByAid" parameterType="java.lang.Integer" resultType="com.zcw.cblog.article.vo.ArticleDetailVo">
+       select
+        u.uid uid,
+        u.nickname nickname,
+        u.avatar avatar,
+        u.exp exp,
+        a.aid aid,
+        a.title title,
+        (select count(id) from article_comment where article_comment.aid = a.aid)  comment_num,
+        a.article_type article_type,
+        a.create_time create_time ,
+        a.browse_num browse_num,
+        a.content content,
+        a.open_procedure open_procedure,
+        a.review_status review_status,
+        a.top top,
+        a.`status` `status`
+        FROM
+        article AS a
+        JOIN user AS u ON a.uid = u.uid
+        where a.aid = #{aid}
+    </select>
+
+    <update id="addBrowseNum" parameterType="java.lang.Integer">
+        update article set browse_num = browse_num + 1 where aid = #{aid}
+    </update>
+
+    <delete id="delBlog" parameterType="java.lang.Integer">
+        delete from article where aid = #{aid}
+    </delete>
+
+    <insert id="addCollectBlog" parameterType="com.zcw.cblog.article.entity.ArticleFavoriteEntity">
+        insert into article_favorite (aid, uid, create_time, status) values(#{aid},#{uid},#{createTime},#{status});
+    </insert>
+
+    <insert id="insertReturnAid" parameterType="com.zcw.cblog.article.entity.ArticleEntity"
+            useGeneratedKeys="true" keyProperty="aid">
+          insert into article(title, uid, create_time, content, open_procedure, review_status, temp_file,update_time)
+         values ( '留言板', 111, '2020-02-19 19:09:37',  '绑定私信', 1, 0, NULL, '2020-03-05 13:01:03');
+    </insert>
+
+
+    <select id="findCollectBlog" parameterType="com.zcw.cblog.article.entity.ArticleFavoriteEntity" resultType="java.lang.Integer">
+        select count(id) from article_favorite
+        <where>
+            <if test="aid!=null">
+                and aid = #{aid}
+            </if>
+            and uid = #{uid}
+        </where>
+    </select>
+
+    <delete id="delCollectBlog" parameterType="com.zcw.cblog.article.entity.ArticleFavoriteEntity">
+        delete from article_favorite where uid = #{uid} and aid = #{aid}
+    </delete>
+
+
+    <select id="findCollectBlogList" resultType="com.zcw.cblog.common.to.ArticleTo">
+        SELECT
+            a.aid,
+            a.title,
+            a.create_time,
+            a.browse_num,
+            a.article_type,
+           (select count(id) from article_comment where article_comment.aid = a.aid)  comment_num
+        FROM
+            article AS a
+            JOIN article_favorite AS cb ON cb.aid = a.aid
+        WHERE
+            cb.uid = #{uid}
+        ORDER BY
+            a.create_time DESC
+            LIMIT #{start},10;
+    </select>
+
+
+    <select id="searchBlogListByKeyword" resultType="com.zcw.cblog.common.to.ArticleTo">
+    SELECT
+            aid,
+            title,
+            create_time,
+            browse_num,
+            article_type,
+           (SELECT COUNT(id) FROM article_comment WHERE article_comment.aid = article.aid)  comment_num
+            FROM
+            article
+            WHERE  ( content LIKE concat('%',#{keyword},'%')  OR title LIKE concat('%',#{keyword},'%') )  AND open_procedure = 0
+            ORDER BY browse_num DESC
+            LIMIT 0,10;
+    </select>
+
+    <select id="searchBlogListByKeywordNum" resultType="java.lang.Integer">
+
+      SELECT
+            COUNT(aid)
+            FROM
+            article
+          WHERE ( title LIKE concat('%',#{keyword},'%') OR content LIKE concat('%',#{keyword},'%') ) AND open_procedure = 0 ;
+    </select>
+
+    <update id="updateBlogTime">
+        update article set update_time = #{updateTime} where aid = #{aid};
+    </update>
+
+
+    <insert id="addBlog" parameterType="com.zcw.cblog.article.entity.ArticleEntity">
+        insert into article(title, uid, create_time, content, open_procedure, review_status, temp_file,update_time)
+         values (#{title},#{uid},#{createTime},#{content},#{openProcedure},#{reviewStatus},#{tempFile},#{updateTime});
+    </insert>
+
+    <update id="updateArticle" >
+        update article set title = #{title}, uid = #{uid},  content = #{content},
+        open_procedure = #{openProcedure}, review_status = #{reviewStatus},
+        temp_file = #{tempFile},update_time = #{updateTime}
+         where aid= #{aid};
+    </update>
+</mapper>

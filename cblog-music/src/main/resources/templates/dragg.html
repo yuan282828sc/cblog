@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- 被拖拽元素 ：draggable属性，表明元素可拖拽-->
+<div  id="ma" class="MA"  draggable="true">
+    A股
+</div>
+
+<!-- 拖拽目标区域 -->
+<div id="box" class="canvas-box">
+
+</div>
+<script>
+    $('#ma').bind('dragstart', function (event) {
+        const ev = event.originalEvent
+        // 存储拖拽元素的id
+        ev.dataTransfer.setData('targetId', ev.target.id)
+    })
+
+    // 注意jquery和js的写法略有不同
+    $('#box').bind('drop', function (event) {
+        // 禁止冒泡
+        event.stopPropagation()
+        const ev = event.originalEvent
+        // 获取被拖拽元素的id
+        const id = ev.dataTransfer.getData('targetId')
+        // 根据id获取该元素或clone该元素
+        const node = $('#${id}').clone(true)  // clone方法相关参数参见附图
+        // const node = document.getElementById(id).cloneNode(true)
+        // node.id = ...
+        node.attr('id', 'newid')
+        ev.target.appendChild(node)
+    })
+</script>
+</body>
+</html>

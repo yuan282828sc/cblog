@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zcw.cblog.file.dao.FileDao">
+
+    <insert id="uploadFiles" parameterType="com.zcw.cblog.file.entity.FileEntity">
+        insert into file(file_name,aid, uid,path,file_size, upload_time)
+        values (#{fileName},#{aid},#{uid},#{path},#{fileSize},#{uploadTime});
+    </insert>
+
+    <select id="getFilesByAid" resultType="com.zcw.cblog.common.vo.FileVo">
+        SELECT file_name fileName,file_size fileSize,upload_time uploadTime
+        FROM file
+        WHERE aid = #{aid};
+    </select>
+
+
+</mapper>

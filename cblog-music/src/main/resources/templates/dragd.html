@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        ul {
+            width: 496px;
+        }
+
+        ul li {
+            list-style: none;
+            width: 60px;
+            height: 60px;
+            border: 1px solid red;
+            float: left;
+        }
+        /*清除浮动*/
+
+        ul::after {
+            content: "";
+            clear: both;
+            display: block;
+        }
+
+        .bg {
+            background: skyblue;
+        }
+
+        .bg2 {
+            position: absolute;
+            background: red;
+            width: 60px;
+            height: 60px;
+        }
+    </style>
+    <script src="https://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+<div class="div">
+    <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+</div>
+<div class="droptarget" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <p ondragstart="dragStart(event)" draggable="true" id="dragtarget">拖动我!</p>
+</div>
+<div class="droptarget" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+<p style="clear:both;"><strong>注意：</strong>Internet Explorer 8 及更早 IE 版本或 Safari 5.1 及更早版本的浏览器不支持 drag 事件。</p>
+<p id="demo"></p>
+<script>
+    function dragStart(event) {
+        event.dataTransfer.setData("Text", event.target.id);
+        document.getElementById("demo").innerHTML = "开始拖动 p 元素";
+    }
+    function allowDrop(event) {
+        event.preventDefault();       //告诉浏览器取消默认事件
+    }
+    function drop(event) {
+        event.preventDefault();
+        var data = event.dataTransfer.getData("Text");
+        event.target.appendChild(document.getElementById(data));
+        document.getElementById("demo").innerHTML = " p 元素已被拖动";
+    }
+    var posArr = []
+    for (var i = 0; i < $("ul li").length; i++) {
+        posArr.push({
+            x: $("ul li").eq(i).offset().left,
+            y: $("ul li").eq(i).offset().top
+        })
+    }
+
+
+    $("ul li").on("mouseover", function () {
+        var index = $(this).index()
+        $(this).parent().addClass("bg")
+        $("ul").each(function () {
+            $(this).find("li").eq(index).addClass("bg")
+        })
+    })
+    $("ul li").on("mouseout", function () {
+        var index = $(this).index()
+        $(this).parent().removeClass("bg")
+        $("ul").each(function () {
+            $(this).find("li").eq(index).removeClass("bg")
+        })
+    })
+    $("ul li").on("click", function (e) {
+        var oDiv = $("<div class='bg2'></div>")
+
+        oDiv.css({
+            "left": $(this).offset().left + 1,
+            "top": $(this).offset().top + 1
+        })
+        $(".div").append(oDiv)
+        var disY = 0;
+        var disX = 0;
+        oDiv.mousedown(function (ev) {
+            var result = {
+                index: 0
+            }
+            disX = ev.pageX - $(this).offset().left;
+            disY = ev.pageY - $(this).offset().top;
+            $(document).mousemove(function (ev) {
+                oDiv.css('left', ev.pageX - disX);
+                oDiv.css('top', ev.pageY - disY);
+            })
+            $(document).mouseup(function (e) {
+
+                for (var i = 0; i < posArr.length; i++) {
+                    var x = posArr[i].x - oDiv.offset().left;
+                    var y = posArr[i].y - oDiv.offset().top;
+                    x = x > 0 ? x : -x;
+                    y = y > 0 ? y : -y;
+                    var temp = x + y;
+                    if (i == 0) { //第一次进来赋值
+                        result.x = i;
+                        result.y = temp;
+                    } else {
+                        if (result.y > temp) {
+                            result.index = i;
+                            result.y = temp;
+                        }
+                    }
+                }
+                oDiv.css('left', posArr[result.index].x + 1);
+                oDiv.css('top', posArr[result.index].y + 1);
+                $(document).off();
+            })
+            return false;
+        })
+    })
+
+</script>
+
+</body>
+
+</html>

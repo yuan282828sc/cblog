@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.zcw</groupId>
+    <artifactId>cblog</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>cblog</name>
+    <description>cblog-聚合服务</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>cblog-article</module>
+        <module>cblog-user</module>
+        <module>cblog-message</module>
+        <module>cblog-gateway</module>
+        <module>cblog-common</module>
+        <module>cblog-file</module>
+        <module>cblog-music</module>
+        <module>cblog-search</module>
+    </modules>
+</project>

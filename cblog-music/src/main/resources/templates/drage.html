@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>H5拖拽</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        html ,body{
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+
+        }
+        div{
+            width:200px;
+            height: 300px;
+            user-select: none;
+        }
+        #left{
+            background-color: rgb(161, 201, 19);
+
+        }
+        #right{
+            background-color: rgb(11, 138, 170);
+        }
+    </style>
+</head>
+<body>
+<div id="left">目标元素</div>
+<div id="right" draggable="true">拖动元素</div>
+<script>
+    const left=document.getElementById('left');
+    const right=document.getElementById('right');
+    let num=0;
+    //拖拽开始的时候进行移动
+    right.ondragstart=function(){
+        this.style.background='#0f0'
+
+    }
+    //ondrag 连续拖拽
+    right.ondrag=function(){
+        console.log(num++)
+    }
+    //ondragend 拖拽结束
+    right.ondragend=function(){
+        this.style.background='#ccc'
+    }
+    //ondragenter 目标拖拽元素 ：被迫进行反应 结合拖拽元素进行反应
+    left.ondragenter=function(){
+        this.innerHTML="释放鼠标"
+    }
+    //ondragover 拖拽持续触发过程
+    left.ondragover=function(e){
+        console.log(num++)
+        //阻止默认事件
+        e.preventDefault();
+        //e.stopPropagation()只要在click事件中，就不会触发上层click事件。
+        e.stopPropagation();
+        return false;
+    }
+    //ondragleave  拖拽离开时触发
+    left.ondragleave=function(){
+        this.innerHTML="请托诶进来"
+    }
+    left.ondrop=function(){
+        document.body.removeChild(right);
+    }
+
+</script>
+</body>
+</html>

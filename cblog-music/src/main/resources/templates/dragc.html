@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息系统</title>
+    <script src="https://cdn.staticfile.org/vue/2.2.2/vue.js"></script>
+    <!-- <link rel='icon'  href='../img/找培训.png '  type=‘image/x-ico’  /> -->
+
+    <style>
+        #drag-test{
+            position: absolute;     /*定位*/
+            top: 10px;
+            left: 10px;
+            width: 200px;
+            height: 30px;
+            background: greenyellow;
+        }
+    </style>
+
+
+    <!--//读，写Cookie-->
+    <script>
+        //写Cookie
+        function addCookie(objName, objValue, objHours) {
+            var str = objName + "=" + escape(objValue); //编码
+            if (objHours > 0) {//为0时不设定过期时间，浏览器关闭时cookie自动消失
+                var date = new Date();
+                var ms = objHours * 3600 * 1000;
+                date.setTime(date.getTime() + ms);
+                str += "; expires=" + date.toGMTString();
+            }
+            document.cookie = str;
+        }
+
+        //读Cookie
+        function getCookie(objName) {//获取指定名称的cookie的值
+            var arrStr = document.cookie.split("; ");
+            for (var i = 0; i < arrStr.length; i++) {
+                var temp = arrStr[i].split("=");
+                if (temp[0] == objName) return unescape(temp[1]);  //解码
+            }
+            return "";
+        }
+    </script>
+</head>
+<body>
+<!-- vue事件详解 -->
+<button id="save-all" onclick="saveAll()">保存</button>
+<!-- 鼠标事件 -->
+<button id="drag-test"  @mousedown="move">
+    {{message}}
+    {{positionX}}
+    {{positionY}}
+</button>
+<script>
+    pX=getCookie("xV")
+    pY=getCookie("yV")
+
+    document.getElementById("drag-test").style.left=pX
+    document.getElementById("drag-test").style.top=pY
+
+    var b1= new Vue({
+        el:"#drag-test",
+        data:{
+            message:"点我即可拖拽",
+            positionX:pX,
+            positionY:pY
+        },
+        methods:{
+            move(e){
+                let odiv = e.target;        //获取目标元素
+
+                //算出鼠标相对元素的位置
+                let disX = e.clientX - odiv.offsetLeft;
+                let disY = e.clientY - odiv.offsetTop;
+                document.onmousemove = (e)=>{       //鼠标按下并移动的事件
+                    //用鼠标的位置减去鼠标相对元素的位置，得到元素的位置
+                    let left = e.clientX - disX;
+                    let top = e.clientY - disY;
+
+                    //绑定元素位置到positionX和positionY上面
+                    this.positionX = top;
+                    this.positionY = left;
+
+
+                    //移动当前元素
+                    odiv.style.left = left + 'px';
+                    odiv.style.top = top + 'px';
+
+
+
+                    pX=odiv.style.left;
+                    pY=odiv.style.top;
+                };
+                document.onmouseup = (e) => {
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                };
+            }
+
+        }
+
+    })
+
+
+
+    function saveAll(){
+        addCookie("xV",pX,1)
+        addCookie("yV",pY,1)
+        alert("保存 成功"+pX+','+pY)
+    }
+
+
+</script>
+</body>
+</html>
